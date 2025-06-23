@@ -142,33 +142,53 @@ app.listen(port, () => {
 console.log(Server is running on http://localhost:${port});
 });
 
-// manifest.json { "name": "ดาวน์โหลดวิดีโอ 4K 1080P 720P", "short_name": "VideoDL", "start_url": ".", "display": "standalone", "background_color": "#ffffff", "theme_color": "#0077b6", "icons": [ { "src": "images/favicon.png", "sizes": "192x192", "type": "image/png" } ] }
+// manifest.json 
+{
+"name": "ดาวน์โหลดวิดีโอ 4K 1080P 720P", 
+"short_name": "VideoDL", 
+"start_url": ".", "display": "standalone", 
+"background_color": "#ffffff", 
+"theme_color": "#0077b6", 
+"icons": [ 
+    { 
+         "src": "images/favicon.png", 
+         "sizes": "192x192", "type": 
+         "image/png" 
+       } 
+    ] 
+ }
 
-// service-worker.js self.addEventListener('install', event => { event.waitUntil( caches.open('video-cache').then(cache => { return cache.addAll([ '/', '/index.html', '/manifest.json', '/images/favicon.png' ]); }) ); });
+// service-worker.js 
+self.addEventListener('install', 
+    event => { event.waitUntil( 
+        caches.open('video-cache').then(cache => { 
+            return cache.addAll([ '/', 
+            '/index.html', 
+            '/manifest.json', 
+            '/images/favicon.png' 
+        ]);
+     })  
+   );
+});
 
-self.addEventListener('fetch', event => { event.respondWith( caches.match(event.request).then(response => { return response || fetch(event.request); }) ); });
+self.addEventListener('fetch', 
+event => { event.respondWith( 
+    caches.match(event.request).then(response => { 
+        return response || fetch(event.request); 
+     }) 
+   ); 
+});
 
 // README.md
-
 ดาวน์โหลดวิดีโอ 4K 1080P 720P
 
 วิธีใช้งาน
-
 วางลิงก์วิดีโอจาก TikTok, Facebook, YouTube, Instagram
-
 เลือกความละเอียด
-
 กดดาวน์โหลด
 
-
 คุณสมบัติ
-
 รองรับหลายแพลตฟอร์ม
-
 มีโฆษณา
-
 PWA: Add to Home Screen ได้
-
 โหลดเร็วด้วย Service Worker
-
-
