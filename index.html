@@ -103,7 +103,7 @@ Download video
             try {
                const res = await fetch(`/api/
                getVideo?url=$
-                   {encodeURIComponent(url)}`);
+               {encodeURIComponent(url)}`);
                 const data = await res.json();
 
                 if (data.formats) {
