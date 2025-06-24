@@ -9,9 +9,8 @@
 ├── /images                // รูปภาพโฆษณาหรือ favicon (ถ้ามี) 
 └── /ads                   // โฟลเดอร์เก็บไฟล์โฆษณา (ถ้ามี)
 
-// index.html
-
-<!DOCTYPE html><html lang="th">
+<!DOCTYPE html>
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
