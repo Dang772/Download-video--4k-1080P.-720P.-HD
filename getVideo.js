@@ -1,28 +1,27 @@
 // api/getVideo.js
-const ytdl = require('ytdl-core');
+import ytdl from 'ytdl-core';
 
-export default async function handler(req, res) {
+export default async function 
+handler(req, res) {
+    const { url } = req.query;
+
+    if (!url) {
+        return res.status(400).json({ error: 'No URL provided' });
+    }
+
     try {
-        const videoUrl = req.query.url;
-
-        if (!videoUrl) {
-            return res.status(400).json({ error: 'Missing video URL' });
-        }
-
-        const info = await ytdl.getInfo(videoUrl);
+        const info = await ytdl.getInfo(url);
         const formats = ytdl.filterFormats(info.formats, 'videoandaudio');
 
-        const availableFormats = formats.map(format => ({
+        const result = formats.map(format => ({
             url: format.url,
             quality: format.qualityLabel,
-            ext: format.container,
-            format_note: format.qualityLabel,
-            height: format.height
+            ext: format.container
         }));
 
-        res.status(200).json({ formats: availableFormats });
+        res.status(200).json({ formats: result });
     } catch (error) {
         console.error('Error fetching video:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Error fetching video' });
     }
 }
