@@ -1,45 +1,30 @@
 // File: api/getVideo.js
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execAsync = promisify(exec);
 
 export default async function handler(req, res) {
   const { url } = req.query;
-
-  if (!url || url.trim() === '') {
-    return res.status(400).json({ error: 'กรุณาวางลิงก์ก่อน' });
+  if (!url) {
+    return res.status(400).json({ error: 'กรุณาระบุ URL วิดีโอ' });
   }
 
-  // ตรวจสอบว่า URL เป็นของ TikTok, Facebook หรือ Instagram
-  const lowerUrl = url.toLowerCase();
-  const isSupported =
-    lowerUrl.includes('tiktok.com') ||
-    lowerUrl.includes('facebook.com') ||
-    lowerUrl.includes('fb.watch') ||
-    lowerUrl.includes('instagram.com');
+  try {
+    const { stdout } = await execAsync(`yt-dlp -j "${url}"`);
+    const json = JSON.parse(stdout);
+    const formats = json.formats.filter(f => f.ext === 'mp4' && f.url && f.height);
 
-  if (!isSupported) {
-    return res.status(400).json({ error: 'รองรับเฉพาะ TikTok, Facebook และ Instagram เท่านั้น' });
+    const simplified = formats.map(f => ({
+      url: f.url,
+      ext: f.ext,
+      height: f.height,
+      format_note: f.format_note || f.format
+    }));
+
+    res.status(200).json({ formats: simplified });
+  } catch (err) {
+    console.error('เกิดข้อผิดพลาด:', err);
+    res.status(500).json({ error: 'ไม่สามารถดึงวิดีโอได้' });
   }
-
-  // จำลองข้อมูลวิดีโอแบบง่าย
-  const formats = [
-    {
-      url: 'https://example.com/video-720p.mp4',
-      ext: 'mp4',
-      height: 720,
-      format_note: '720p'
-    },
-    {
-      url: 'https://example.com/video-1080p.mp4',
-      ext: 'mp4',
-      height: 1080,
-      format_note: '1080p'
-    },
-    {
-      url: 'https://example.com/video-4k.mp4',
-      ext: 'mp4',
-      height: 2160,
-      format_note: '4K'
-    }
-  ];
-
-  return res.status(200).json({ formats });
 }
