@@ -1,36 +1,33 @@
-const express = require('express');
-const cors = require('cors');
-const ytdlp = require('yt-dlp-exec');
+// server.js
+ import express from 'express'; 
+import cors from 'cors'; 
+import { exec } from 'child_process'; 
+import fs from 'fs'; 
+import path from 'path'; 
+import { fileURLToPath } from 'url';
 
-const app = express();
-const port = 3000;
+const __filename = fileURLToPath(import.meta.url); const __dirname = path.dirname(__filename);
+const app = express(); const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.static(__dirname));
+app.use(cors()); app.use(express.static(path.join(__dirname, 'public')));
+app.get('/api/getVideo', (req, res) => { const videoURL = req.query.url; if (!videoURL) return res.status(400).json({ error: 'ต้องใส่ URL' });
 
-app.get('/api/getVideo', async (req, res) => {
-    const videoUrl = req.query.url;
+const cmd = yt-dlp -J ${videoURL}; exec(cmd, (error, stdout, stderr) => { if (error) { console.error('เกิดข้อผิดพลาด:', stderr); return res.status(500).json({ error: 'ไม่สามารถดึงวิดีโอได้' }); }
+try {
+  const data = JSON.parse(stdout);
+  const formats = data.formats.map(format => ({
+    url: format.url,
+    ext: format.ext,
+    height: format.height,
+    format_note: format.format_note
+  })).filter(f => f.url && f.ext === 'mp4');
+  res.json({ formats });
+} catch (err) {
+  console.error('แปลง JSON ผิด:', err);
+  res.status(500).json({ error: 'ข้อมูลผิดพลาด' });
+}
+}); });
+app.listen(PORT, () => { 
+    console.log(Server เริ่มต้นที่ http://localhost:${PORT}); 
+    });
 
-    if (!videoUrl) {
-        return res.status(400).json({ error: 'กรุณาใส่ URL' });
-    }
-
-    try {
-        const videoInfo = await ytdlp(videoUrl, {
-            dumpSingleJson: true,
-            noWarnings: true,
-            noCallHome: true,
-            preferFreeFormats: true,
-            youtubeSkipDashManifest: true
-        });
-
-        res.json(videoInfo);
-    } catch (error) {
-        console.error('Error fetching video:', error);
-        res.status(500).json({ error: 'ไม่สามารถดึงข้อมูลวิดีโอได้' });
-    }
-});
-
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
